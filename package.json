@@ -1,0 +1,13 @@
+{
+  "name": "flight-search-matrix-extension",
+  "version": "0.8.12",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check sidepanel.js && node --check src/*.js && node --check src/content/*.js",
+    "verify": "node scripts/verify.mjs",
+    "release:check": "node scripts/release-check.mjs",
+    "release:package": "node scripts/package-release.mjs"
+  }
+}

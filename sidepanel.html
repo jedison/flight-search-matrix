@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flight Search Matrix</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Flight Search Matrix <span id="extensionVersion" class="versionBadge">v0.8.12</span></h1>
+      <p>Flight research, one clear plan at a time.</p>
+    </header>
+
+    <section class="card run-card" aria-labelledby="runHeading">
+      <h2 id="runHeading">Run</h2><p class="section-note">Runs continue when this popup closes. Reopen it to check progress.</p>
+      <div class="run-console">
+        <div class="run-command-bar">
+          <button id="testMilesAndMore" class="primary">Test M&M form</button>
+          <button id="start">Start matrix</button>
+          <div class="run-secondary-actions">
+          <button id="pause">Pause</button>
+          <button id="resume">Resume</button>
+          <button id="stop">Stop</button>
+          </div>
+        </div>
+        <div class="run-status-stack" role="status">
+          <div id="runState" class="run-state idle"><span class="run-dot"></span><strong id="runStateLabel">IDLE</strong><span id="runStateDetail">Ready.</span></div>
+          <div id="runStatus" class="info" aria-live="polite">Idle.</div>
+        </div>
+      </div>
+      <details class="activity-details"><summary>Recent activity</summary><ol id="runTimeline" class="run-timeline" aria-live="polite"><li>Waiting for a run.</li></ol></details>
+      <label class="check"><input id="mmPinnedOverlay" type="checkbox"> Keep FSM status pinned in the M&amp;M test tab until unpinned</label>
+      <p class="muted">M&M uses the site default of one passenger. Fare-combination calibration is round-trip only and enters both dates.</p>
+    </section>
+
+    <section id="planSection" class="card" aria-labelledby="planHeading">
+      <h2 id="planHeading">Plan</h2><p class="section-note">Always editable. Changes apply to your next run, not the active search.</p>
+      <div class="profile-grid">
+        <label>Saved profile
+          <select id="profileSelect"><option value="">Current / unsaved</option></select>
+        </label>
+        <div class="profileButtons">
+          <button id="saveProfile">Save profile</button>
+          <button id="deleteProfile">Delete</button>
+          <button id="exportProfiles">Export</button>
+          <button id="importProfiles">Import</button>
+          <input id="profileImportFile" type="file" accept="application/json" hidden>
+        </div>
+      </div>
+      <label>Adapter
+        <select id="adapter">
+          <option value="miles-and-more">Miles & More - experimental</option>
+          <option value="brussels-airlines-cash">Brussels Airlines cash - experimental</option>
+          <option value="lufthansa-cash">Lufthansa cash - experimental</option>
+          <option value="manual">Generic/manual - capture only</option>
+        </select>
+      </label>
+      <div class="grid2">
+        <label>Departure city/cities
+          <textarea id="origins" rows="3" placeholder="BRU\nAMS" aria-describedby="airportFormatHelp"></textarea>
+        </label>
+        <label>Arrival city/cities
+          <textarea id="destinations" rows="3" placeholder="SLC\nDEN\nBZN" aria-describedby="airportFormatHelp"></textarea>
+        </label>
+      </div>
+      <p id="airportFormatHelp" class="field-help">Enter one airport or group per line. Commas and semicolons work too: <code>BRU, AMS; CDG</code>.</p>
+      <label>Trip type
+        <select id="tripType">
+          <option value="roundtrip">Round trip</option>
+          <option value="oneway">One way</option>
+          <option value="openjaw">Open jaw</option>
+        </select>
+      </label>
+
+      <div id="openJawFields" class="grid2">
+        <label>Return departure city/cities
+          <textarea id="returnOrigins" rows="2" placeholder="JAC
+SLC"></textarea>
+        </label>
+        <label>Return arrival city/cities
+          <textarea id="returnDestinations" rows="2" placeholder="BRU"></textarea>
+        </label>
+      </div>
+      <div class="grid2">
+        <label>Outbound start <input id="outboundStart" type="date"></label>
+        <label>Outbound end <input id="outboundEnd" type="date"></label>
+        <label>Return start <input id="returnStart" type="date"></label>
+        <label>Return end <input id="returnEnd" type="date"></label>
+        <label>Minimum nights <input id="minNights" type="number" min="0" value="9"></label>
+        <label>Maximum nights <input id="maxNights" type="number" min="0" value="13"></label>
+      </div>
+      <label>Adults <input id="adults" type="number" min="1" max="9" value="2"></label>
+      <fieldset>
+        <legend>Cabins</legend>
+        <label class="check"><input type="checkbox" name="cabin" value="economy" checked> Economy</label>
+        <label class="check"><input type="checkbox" name="cabin" value="premium economy"> Premium Economy</label>
+        <label class="check"><input type="checkbox" name="cabin" value="business" checked> Business</label>
+        <label class="check"><input type="checkbox" name="cabin" value="first"> First</label>
+      </fieldset>
+      <div class="buttonRow"><button id="cloneLastRun">Clone last run</button></div>
+
+      <details>
+        <summary>Connection and carrier constraints</summary>
+        <div class="grid2">
+          <label>Maximum stops <input id="maxStops" type="number" min="0" placeholder="Any"></label>
+          <label>Maximum layover minutes <input id="maxLayoverMinutes" type="number" min="0" placeholder="Any"></label>
+          <label>Allowed connections <textarea id="allowedConnectionAirports" rows="2" placeholder="FRA
+MUC"></textarea></label>
+          <label>Blocked connections <textarea id="blockedConnectionAirports" rows="2" placeholder="LHR"></textarea></label>
+          <label>Allowed carriers <textarea id="allowedCarriers" rows="2" placeholder="LH
+UA"></textarea></label>
+          <label>Blocked carriers <textarea id="blockedCarriers" rows="2"></textarea></label>
+        </div>
+        <label class="check"><input id="requireRequestedCabin" type="checkbox"> Reject mixed-cabin results when detected</label>
+      </details>
+      <details><summary>Custom airport groups</summary><label>Custom groups JSON<textarea id="airportGroups" rows="4" placeholder='{"ROCKIES":["SLC","DEN","BZN"]}'></textarea></label><p class="muted">Built-ins such as NYC, WAS, YELLOWSTONE_NORTH and YELLOWSTONE_SOUTH still work. Custom names override built-ins.</p></details>
+      <label class="check"><input id="smartOrder" type="checkbox" checked> Smart search ordering - preferred airports/cabins and central dates first</label>
+      <div class="buttonRow">
+        <button id="preview">Build matrix</button>
+      </div>
+      <div id="matrixInfo" class="info">No matrix built yet.</div>
+      <details><summary>Generated queries</summary><pre id="matrixPreview" class="matrix-preview">No generated queries.</pre></details>
+    </section>
+
+    <details id="monitoringSection" class="card disclosure">
+      <summary><strong>Monitoring options</strong><span>Retries, pacing & notifications</span></summary><div class="disclosure-body">
+      <div class="grid2">
+        <label>Retries/query <input id="retriesPerQuery" type="number" min="1" max="10" value="3"></label>
+        <label>Min delay seconds <input id="minDelaySeconds" type="number" min="0" max="300" value="8"></label>
+        <label>Max delay seconds <input id="maxDelaySeconds" type="number" min="0" max="300" value="16"></label>
+        <label>Result wait seconds <input id="resultWaitSeconds" type="number" min="10" max="120" value="35"></label>
+        <label>Maximum backoff seconds <input id="maxBackoffSeconds" type="number" min="10" max="600" value="120"></label>
+      </div>
+      <label class="check"><input id="stopOnFirstAvailable" type="checkbox"> Stop the run after the first confirmed availability</label>
+      <label class="check"><input id="notificationsEnabled" type="checkbox"> Enable Chrome notifications (off by default)</label>
+      <p class="muted">A single "not available" response is recorded but is not considered final. Only repeated completed no-result searches produce NO_RESULT_REPEATED.</p>
+      </div>
+    </details>
+
+    <details id="researchSection" class="card disclosure"><summary><strong>Results & history</strong><span>Current best, summaries & all attempts</span></summary><div class="disclosure-body">
+    <details class="subsection">
+      <summary>Current best</summary><div class="disclosure-body">
+      <p class="muted">Best retained result for each normalized search key across all runs. Cash is ranked only when it is a per-person total including fees.</p>
+      <div class="grid2"><label>Filter provider<select id="bestAdapterFilter"><option value="">All</option><option value="miles-and-more">Miles & More</option><option value="brussels-airlines-cash">Brussels Airlines cash</option><option value="lufthansa-cash">Lufthansa cash</option><option value="manual">Manual</option></select></label><label>Filter status<select id="bestStatusFilter"><option value="">All</option><option value="AVAILABLE">AVAILABLE</option><option value="NO_RESULT_REPEATED">NO_RESULT_REPEATED</option><option value="NEEDS_USER">NEEDS_USER</option><option value="INCONCLUSIVE">INCONCLUSIVE</option></select></label></div><div id="bestCount" class="info"></div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>Status</th><th>Route</th><th>Dates</th><th>Cabin</th><th>Best miles</th><th>Cash/person incl fees</th><th>Last checked</th></tr></thead>
+          <tbody id="bestBody"></tbody>
+        </table>
+      </div>
+      <div id="historyDetail" class="info">Select History on a Current Best row to inspect the latest attempt details.</div>
+      </div>
+    </details>
+    <details class="subsection">
+      <summary>Query summaries</summary><div class="disclosure-body">
+      <p class="muted">One row per completed query. Repeated attempts remain preserved separately below.</p>
+      <div id="summaryCount" class="info"></div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>Status</th><th>Route</th><th>Dates</th><th>Cabin</th><th>Attempts</th><th>Best miles</th><th>Cash/person incl fees</th></tr></thead>
+          <tbody id="summariesBody"></tbody>
+        </table>
+      </div>
+      </div>
+    </details>
+    <details class="subsection">
+      <summary>Results</summary><div class="disclosure-body">
+      <div class="buttonRow">
+        <button id="refreshResults">Refresh</button>
+        <button id="exportCsv">Export CSV</button>
+      </div>
+      <div id="resultCount" class="info"></div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>Status</th><th>Route</th><th>Dates</th><th>Cabin</th><th>Miles</th><th>Cash/person incl fees</th><th>Attempt</th></tr></thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+      </div>
+    </details>
+    </div></details>
+
+    <details id="supportSection" class="card disclosure"><summary><strong>Support & diagnostics</strong><span>Capture, export & Google Sheets</span></summary><div class="disclosure-body">
+      <p class="muted">Diagnostics can contain page text and search details. Review before sharing.</p>
+      <div class="buttonRow"><button id="captureDiagnostic">Download diagnostic</button><button id="downloadBrowserGate">Download release-test proof</button><button id="captureCurrent">Capture current page</button></div>
+    <details class="subsection">
+      <summary>Google Sheets sync</summary><div class="disclosure-body">
+      <label>Apps Script Web App URL <input id="sheetsWebAppUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"></label>
+      <label>Sync token <input id="sheetsToken" type="password" autocomplete="off"></label>
+      <label class="check"><input id="autoSync" type="checkbox"> Auto-sync after runs</label>
+      <div class="buttonRow">
+        <button id="saveSettings">Save settings</button>
+        <button id="syncNow">Sync pending</button>
+      </div>
+      <div id="syncStatus" class="info">Local IndexedDB is always used first.</div>
+      </div>
+    </details>
+    </div></details>  </main>
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

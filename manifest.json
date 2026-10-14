@@ -1,0 +1,66 @@
+{
+  "manifest_version": 3,
+  "name": "Flight Search Matrix",
+  "version": "0.8.12",
+  "description": "Provider-neutral flight search matrix with award and Lufthansa Group cash adapters, durable history, smart scheduling, and Google Sheets sync.",
+  "minimum_chrome_version": "114",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "scripting",
+    "debugger"
+  ],
+  "host_permissions": [
+    "https://*.miles-and-more.com/*",
+    "https://*.lufthansa.com/*",
+    "https://*.brusselsairlines.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "src/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Flight Search Matrix",
+    "default_popup": "sidepanel.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.miles-and-more.com/*"
+      ],
+      "js": [
+        "src/content/miles-and-more.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.lufthansa.com/*",
+        "https://*.brusselsairlines.com/*"
+      ],
+      "js": [
+        "src/content/lhg-cash.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "optional_permissions": [
+    "notifications"
+  ]
+}

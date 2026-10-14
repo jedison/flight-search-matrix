@@ -1,0 +1,68 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+
+const source = await readFile(new URL('../src/content/miles-and-more.js', import.meta.url), 'utf8');
+const worker = await readFile(new URL('../src/service-worker.js', import.meta.url), 'utf8');
+
+test('M&M guided test verifies one-way travel type and confirms one accepted submission', () => {
+  assert.match(source, /async function setTravelType/);
+  assert.match(source, /const current=findControl\(\['travel type'\]/);
+  assert.match(source, /const after=controlValueText\(current\)/);
+  assert.match(source, /id-outboundfrom-textfield/);
+  assert.match(source, /id-outboundto-textfield/);
+  assert.match(source, /function formReadiness/);
+  assert.match(source, /function prepareNativeSearchClick/);
+  assert.match(source, /SEARCH_FLIGHTS_NATIVE/);
+  assert.match(source, /FSM_MM_CONFIRM_NATIVE_SEARCH_CLICK/);
+  assert.match(source, /function installNativeClickTrace/);
+  assert.match(source, /event\.isTrusted===true/);
+  assert.match(source, /document\.addEventListener\(type,record,true\)/);
+  assert.match(source, /searchSubmissionAcknowledged/);
+  assert.match(source, /state:'READY_FOR_NATIVE_CLICK'/);
+  assert.match(source, /FORM_NOT_CONFIRMED/);
+  assert.match(source, /Miles & More did not confirm/);
+  assert.doesNotMatch(source, /function setPassengers|async function setPassengers/);
+  assert.doesNotMatch(source, /Setting passenger count/);
+  assert.match(source, /PASSENGERS_DEFAULT/);
+  assert.match(source, /Using Miles & More default of 1 passenger for current calibration/);
+  assert.match(worker, /type:'FSM_MM_READY'/);
+  assert.match(worker, /async function waitForMilesResultNavigation/);
+  assert.match(worker, /async function waitForMilesFormReady/);
+  assert.match(worker, /M_AND_M_HANDSHAKE/);
+  assert.match(worker, /chrome\.scripting\.executeScript\(\{target:\{tabId\},files:\['src\/content\/miles-and-more\.js'\]\}\)/);
+  assert.match(worker, /M&M booking form did not become ready within 20 seconds/);
+  assert.match(worker, /needsUserDetail/);
+  assert.match(worker, /detail:finalDetail/);
+  assert.match(worker, /READY_FOR_NATIVE_CLICK/);
+  assert.match(worker, /chrome\.debugger\.attach/);
+  assert.match(worker, /Input\.dispatchMouseEvent/);
+  assert.match(worker, /clickMilesOutboundFareWithNativeInput/);
+  assert.match(worker, /clickMilesExpandedFareSelectWithNativeInput/);
+  assert.match(worker, /FSM_MM_PREPARE_OUTBOUND_FARE/);
+  assert.match(worker, /FSM_MM_PREPARE_EXPANDED_FARE_SELECT/);
+  assert.match(source, /function prepareOutboundFareFamily/);
+  assert.match(source, /function prepareExpandedFareSelection/);
+  assert.match(worker, /chrome\.debugger\.detach/);
+  assert.match(worker, /NATIVE_CLICK_TRACE/);
+  assert.match(worker, /state\.mode!=='guided-mm-test'/);
+  assert.match(worker, /Miles & More matrix runs remain disabled while round-trip fare-combination calibration is in progress/);
+  assert.match(worker, /fare-combination calibration is round-trip only/);
+  assert.match(worker, /active:state\.mode==='guided-mm-test'/);
+  const clearRun = worker.match(/async function clearRunPersistence\(status\) \{[\s\S]*?\n\}/)?.[0] || '';
+  assert.doesNotMatch(clearRun, /active:false/);
+});
+
+test('M&M prepares exactly one native Search flights click without a submit fallback', () => {
+  const match=source.match(/function prepareNativeSearchClick\(runId\) \{([\s\S]*?)\n  \}/);
+  assert.ok(match);
+  assert.doesNotMatch(match[1],/\.click\(/);
+  assert.doesNotMatch(match[1],/requestSubmit|dispatchEvent/);
+  assert.match(worker,/state === 'READY_FOR_NATIVE_CLICK'/);
+  const searchClick=worker.match(/async function clickMilesSearchWithNativeInput\([^]*?\n\}/)?.[0] || '';
+  assert.equal((searchClick.match(/type:'mousePressed'/g) || []).length,1);
+  assert.equal((searchClick.match(/type:'mouseReleased'/g) || []).length,1);
+  assert.match(searchClick,/buttons:1/);
+  assert.match(searchClick,/buttons:0/);
+  assert.doesNotMatch(worker,/READY_FOR_USER|waitForManualMilesSubmit/);
+});
