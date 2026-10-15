@@ -9,6 +9,12 @@ Flight Search Matrix is a Manifest V3 Chrome extension for repeatable flight awa
 
 Current version: **0.8.12**
 
+![Flight Search Matrix popup beside an award-flight search form](docs/images/flight-search-matrix-popup.png)
+
+_FSM uses a compact floating popup so its plan and run state remain available
+without replacing the provider page. Provider controls and account verification
+remain under the user's control._
+
 FSM uses an airplane-and-matrix icon in Chrome. The master artwork is [fsm-airplane-matrix-source.png](icons/fsm-airplane-matrix-source.png); Chrome consumes the generated 16, 32, 48 and 128 px PNG files under `icons/`.
 
 For departure and arrival lists, enter one airport/group per line, or separate entries with commas or semicolons. For example, `BRU`, `AMS`, and `CDG` may be entered as three lines or as `BRU, AMS; CDG`. FSM accepts a pasted literal `\n` as a newline too. This is simple delimiter-separated input, not a full CSV import format.
