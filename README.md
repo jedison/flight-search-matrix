@@ -2,6 +2,11 @@
 
 Flight Search Matrix is a Manifest V3 Chrome extension for repeatable flight award and cash-fare research. It is designed around unreliable airline/loyalty search engines: every attempt is preserved, a single negative response is not treated as conclusive, and confirmed positive availability outranks later failures.
 
+> **Project status:** the research engine and local workflows are usable, while
+> provider-specific adapters remain experimental calibration work. FSM is not a
+> booking service: it does not bypass login, MFA, CAPTCHA, Cloudflare, rate
+> limits, or other provider controls.
+
 Current version: **0.8.12**
 
 FSM uses an airplane-and-matrix icon in Chrome. The master artwork is [fsm-airplane-matrix-source.png](icons/fsm-airplane-matrix-source.png); Chrome consumes the generated 16, 32, 48 and 128 px PNG files under `icons/`.
@@ -70,6 +75,9 @@ npm run release:package
 ```
 
 `npm run verify` runs unit tests, JavaScript syntax checks, version consistency checks and the repository-wide no-em-dash rule.
+
+See [public project status](docs/PUBLIC_STATUS.md),
+[security reporting](SECURITY.md), and [contribution guidance](CONTRIBUTING.md).
 
 `npm run release:check` also requires a fresh, real Miles & More guided-browser proof. Complete one guided M&M test through result navigation, use **Download release-test proof**, and save the downloaded JSON as `tests/live/miles-and-more-browser-gate.json`. The proof expires after 72 hours and must match the release version. `npm run release:package` runs this gate before creating the ZIP and checksum.
 
